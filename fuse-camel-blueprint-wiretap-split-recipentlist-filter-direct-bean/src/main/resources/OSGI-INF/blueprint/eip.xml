@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd              http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
+    <bean class="io.fabric8.quickstarts.eip.RegionSupport" id="MyRegionSupport"/>
+    <camelContext id="eip-example-context"
+        xmlns="http://camel.apache.org/schema/blueprint" xmlns:order="http://fabric8.com/examples/order/v7">
+        <propertyPlaceholder id="placeholder" location="classpath:propiedades.properties"/>
+        <route id="mainRoute">
+            <from id="_from1" uri="file:{{ruta.principal}}"/>
+            <!-- COPIA UN MENSAJE MIENTRAS PASAS POR UNA RUTA -->
+            <log id="_log1" message="{{log.uno}} ${file:name}"/>
+            <!-- DIVIDE MENSAJES GRANDES EN MENSAJES MAS PEQUEÑOS -->
+            <wireTap id="_wireTap1" uri="direct:wiretap"/>
+            <to id="_to1" uri="direct:splitter"/>
+            <log id="_log5" message="{{log.cinco}} ${file:name}"/>
+        </route>
+        <!-- COPIA EL ARCHIVO orders.xml A LA CARPETA work/eip/archive -->
+        <route id="wiretapRoute">
+            <from id="_from2" uri="direct:wiretap"/>
+            <log id="_log2" message="{{log.dos}} ${file:name}"/>
+            <to id="_to2" uri="file:{{ruta.wireTap}}"/>
+        </route>
+        <route id="splitterRoute">
+            <from id="_from3" uri="direct:splitter"/>
+            <split id="_split1">
+                <xpath>//order:order</xpath>
+                <!-- ESTABLECE EN EL HEADER orderId EL RESULTADO DEL XPATH /order:order/@id -->
+                <!-- ESTABLECE EN EL HEADER region EL RESULTADO DE LA CLASE JAVA io.fabric8.quickstarts.eip.RegionSupport 
+                	 LA CUAL EJECUTA UNA EXPRESION XPATH /order:order/order:customer/order:country -->
+                <setHeader headerName="orderId" id="_setHeader1">
+                    <xpath resultType="java.lang.String">/order:order/@id</xpath>
+                </setHeader>
+                <setHeader headerName="region" id="_setHeader2">
+                    <method bean="MyRegionSupport" method="getRegion"/>
+                </setHeader>
+                <!-- DETERMINA DINAMICAMENTE LA RUTA Y EL NOMBRE DEL ARCHIVO HACIA DONDE SE VA A MANDAR -->
+                <log id="_log3" message="{{log.tres1}} ${header.orderId} {{log.tres2}} ${header.region}"/>
+                <recipientList id="_recipientList1">
+                    <simple>file:{{ruta.recipientList}}${header.region}?fileName=${header.orderId}.xml,direct:filter</simple>
+                </recipientList>
+            </split>
+        </route>
+        <route id="filterRoute">
+            <!-- FILTRA MENSAJES Y EJECUTA LOGICA QUE COINCIDA CON EL FILTRO -->
+            <from id="_from4" uri="direct:filter"/>
+            <filter id="_filter1">
+                <!-- EJECUTA LA EXPRESION = SI LA SUMA DE LA quantity ES MAYOR > A 100 ENTONCES IMPRIME EL LOG _log5 -->
+                <xpath resultType="java.lang.String">sum(//order:quantity/text()) &gt; 100</xpath>
+                <log id="_log4" message="{{log.cuatro1}} ${header.orderId} {{log.cuatro2}}"/>
+            </filter>
+        </route>
+    </camelContext>
+</blueprint>
