@@ -107,13 +107,13 @@ $ fabric:profile-edit -b mvn:com.redhat.fuse.quickstart/fuse-camel-blueprint-act
 
 Para activar la ruta tenemos que hacer lo siguiente:
 
-1.- En la carpeta de instalacion de tu Fuse nos dirigimos a la carpeta de la instancia Ejemplo: instances/multiva y creamos la siguiente carpeta: `work/jms/input`
-2.- Copia los archivos de la carpeta: `src/main/fabric8/data` a la carpeta `work/jms/input`
-3.- Espera unos momentos y la ruta empezara a ordenar los archivos de la siguiente manera:
-	* `order1.xml` en `work/jms/output/others`
-    * `order2.xml` y `order4.xml` en `work/jms/output/uk`
-    * `order3.xml` y `order5.xml` en `work/jms/output/us`
-4.-Para observar lo que pasa puedes abrir la consola web en logs o ejecutar el comando $ log:display
+* En la carpeta de instalacion de tu Fuse nos dirigimos a la carpeta de la instancia Ejemplo: instances/multiva y creamos la siguiente carpeta: `work/jms/input`
+* Copia los archivos de la carpeta: `src/main/fabric8/data` a la carpeta `work/jms/input`
+* Espera unos momentos y la ruta empezara a ordenar los archivos de la siguiente manera:
+	 `order1.xml` en `work/jms/output/others`
+      `order2.xml` y `order4.xml` en `work/jms/output/uk`
+      `order3.xml` y `order5.xml` en `work/jms/output/us`
+* Para observar lo que pasa puedes abrir la consola web en logs o ejecutar el comando $ log:display
 	
 
 ### 6.- ELIMINACION DEL BUNDLE
